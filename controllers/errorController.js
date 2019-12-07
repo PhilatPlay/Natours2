@@ -15,9 +15,9 @@ const handleDuplicateFieldsDB = err => {
 };
 
 const handleValidationErrorDB = err => {
-  const errors = Oblect.values(err.errors).map(el => el.message);
+  const errors = Object.values(err.errors).map(el => el.message);
 
-  const message = `invalid input data. ${errors.join('. ')}`;
+  const message = `invalid input data. ${errors.join(' ')}`;
   return new AppError(message, 400);
 };
 
@@ -65,10 +65,9 @@ module.exports = (err, req, res, next) => {
     if (error.code === 11000) {
       error = handleDuplicateFieldsDB(error);
     }
-    if (error.code === 'ValidationError') {
+    if (error.name === 'ValidationError') {
       error = handleValidationErrorDB(error);
     }
-
     sendErrorProd(error, res);
   }
 };
