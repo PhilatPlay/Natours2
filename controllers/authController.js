@@ -69,6 +69,32 @@ exports.login = catchAsync(async (req, res, next) => {
   // if everything is ok, send token to client
   createSendToken(user, 200, res);
 });
+// only for rendered pages, no errors!
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  if (req.cookies.jwt) {
+    // verify token
+    const decoded = await promisify(jwt.verify)(
+      req.cookies.jwt,
+      process.env.JWT_SECRET
+    );
+    console.log(decoded);
+    // 3. check if user still exist
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return next();
+    }
+    // 4. check if user changed pasword after issue of JWT (token)
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next();
+    }
+
+    // there is a looged in user
+    res.locals.user = currentUser;
+    return next();
+  }
+
+  next();
+});
 
 exports.protect = catchAsync(async (req, res, next) => {
   // 1. getting token and checking if it's there
