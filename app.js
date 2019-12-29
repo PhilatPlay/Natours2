@@ -29,6 +29,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 // security http headers
 app.use(helmet());
 
+// Development logging
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
 // limits requests from samr IP
 const limiter = rateLimit({
   max: 100,
@@ -39,8 +44,8 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // bady parser, reading data from body into req.body
-app.use(morgan('dev'));
 app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
 // data sanitization against NoSQL injection
@@ -67,7 +72,7 @@ app.use(
 // test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  console.log(req.cookies);
+  // console.log(req.cookies);
 
   next();
 });
