@@ -47,7 +47,6 @@ exports.signup = catchAsync(async (req, res, next) => {
   });
 
   const url = `${req.protocol}://${req.get('host')}/me`;
-  console.log(url);
   await new Email(newUser, url).sendWelcome();
 
   createSendToken(newUser, 201, res);
@@ -68,8 +67,6 @@ exports.login = catchAsync(async (req, res, next) => {
   }
   // could abreviate the above when the field and variable are the same
   // like so... const user = User.findOne({email})
-
-  console.log(user);
 
   // if everything is ok, send token to client
   createSendToken(user, 200, res);
@@ -102,7 +99,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
   // 2. verification token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  console.log(decoded);
+
   // 3. check if user still exist
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
@@ -132,7 +129,7 @@ exports.isLoggedIn = async (req, res, next) => {
         req.cookies.jwt,
         process.env.JWT_SECRET
       );
-      console.log(decoded);
+
       // 3. check if user still exist
       const currentUser = await User.findById(decoded.id);
       if (!currentUser) {
